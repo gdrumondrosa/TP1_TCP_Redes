@@ -16,23 +16,38 @@ Coordinate coordCli = {-19.9735, -43.9671};
 
 int main(int argc, char const *argv[]) {
     int csocket, porta, nbytes, err;
-    char tipo[5], enderecoIP[15], msg[100];
-    struct sockaddr_in endServidor;
+    char tipo[10], enderecoIP[15], msg[100];
+    struct sockaddr_in endereco_ipv4;
+    struct sockaddr_in6 endereco_ipv6;
 
     strcpy(tipo, argv[1]);
     strcpy(enderecoIP, argv[2]);
     porta      = atoi(argv[3]);
 
-    /* Criacao do socket */
-    csocket = socket(AF_INET, SOCK_STREAM, 0);
+    if(!strcmp(tipo, "ipv4")) {
+        /* Criacao do socket */
+        csocket = socket(AF_INET, SOCK_STREAM, 0);
 
-    /* Conexao (abertura ativa) */
-    memset(&endServidor, 0, sizeof(endServidor));
-    endServidor.sin_family      = AF_INET;
-    endServidor.sin_addr.s_addr = inet_addr(enderecoIP);
-    endServidor.sin_port        = htons(porta);
-    
-    err = connect(csocket, (struct sockaddr*) &endServidor, sizeof(endServidor));
+        /* Abertura ativa */
+        memset(&endereco_ipv4, 0, sizeof(endereco_ipv4));
+        endereco_ipv4.sin_family       = AF_INET;
+        endereco_ipv4.sin_addr.s_addr  = inet_addr(enderecoIP);
+        endereco_ipv4.sin_port         = htons(porta);
+
+        err = connect(csocket, (struct sockaddr*) &endereco_ipv4, sizeof(endereco_ipv4));
+    }
+    else {
+        /* Criacao do socket */
+        csocket = socket(AF_INET6, SOCK_STREAM, 0);
+
+        /* Abertura ativa */
+        memset(&endereco_ipv6, 0, sizeof(endereco_ipv6));
+        endereco_ipv6.sin6_family       = AF_INET6;
+        endereco_ipv6.sin6_addr         = in6addr_any;
+        endereco_ipv6.sin6_port         = htons(porta);
+
+        err = connect(csocket, (struct sockaddr*) &endereco_ipv6, sizeof(endereco_ipv6));
+    }
     
     /* Comunicacao */
     while(1) {

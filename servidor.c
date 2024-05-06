@@ -41,34 +41,55 @@ int main(int argc, char const *argv[]) {
     char *eptr;
     int ssocket, csocket, porta, nbytes, err;
     double dist, latCli, longiCli;
-    char tipo[5], dist_char[10], at[100], msg[100];
-    struct sockaddr_in endereco, endCliente;
-    int tamEndereco = sizeof(endCliente);
+    char tipo[10], dist_char[100], at[100], msg[100];
+    struct sockaddr_in endereco_ipv4, endCliente_ipv4;
+    struct sockaddr_in6 endereco_ipv6, endCliente_ipv6;
+    int tamEndereco_ipv4 = sizeof(endCliente_ipv4);
+    int tamEndereco_ipv6 = sizeof(endCliente_ipv6);
 
     /* Leitura da porta a ser atribuida ao servidor */
     strcpy(tipo, argv[1]);
     porta = atoi(argv[2]);
 
-    /* Criacao do socket */
-    ssocket = socket(AF_INET, SOCK_STREAM, 0);
+    if(!strcmp(tipo, "ipv4")) {
+        /* Criacao do socket */
+        ssocket = socket(AF_INET, SOCK_STREAM, 0);
 
-    /* Abertura passiva */
-    memset(&endereco, 0, sizeof(endereco));
-    endereco.sin_family      = AF_INET;
-    endereco.sin_addr.s_addr = INADDR_ANY;
-    endereco.sin_port        = htons(porta);
+        /* Abertura passiva */
+        memset(&endereco_ipv4, 0, sizeof(endereco_ipv4));
+        endereco_ipv4.sin_family       = AF_INET;
+        endereco_ipv4.sin_addr.s_addr  = INADDR_ANY;
+        endereco_ipv4.sin_port         = htons(porta);
 
-    err = bind(ssocket, (struct sockaddr*) &endereco, sizeof(endereco));
+        err = bind(ssocket, (struct sockaddr*) &endereco_ipv4, sizeof(endereco_ipv4));
+    }
+    else {
+        /* Criacao do socket */
+        ssocket = socket(AF_INET6, SOCK_STREAM, 0);
+
+        /* Abertura passiva */
+        memset(&endereco_ipv6, 0, sizeof(endereco_ipv6));
+        endereco_ipv6.sin6_family       = AF_INET6;
+        endereco_ipv6.sin6_addr         = in6addr_any;
+        endereco_ipv6.sin6_port         = htons(porta);
+
+        err = bind(ssocket, (struct sockaddr*) &endereco_ipv6, sizeof(endereco_ipv6));
+    }
 
     err = listen(ssocket, 1);
 
     printf("Aguardando solicitação.\n");
 
     while(1) {
-        csocket = accept(ssocket, (struct sockaddr*) &endCliente, &tamEndereco);
+        if(!strcmp(tipo, "ipv4")) {
+            csocket = accept(ssocket, (struct sockaddr*) &endCliente_ipv4, &tamEndereco_ipv4);
+        }
+        else {
+            csocket = accept(ssocket, (struct sockaddr*) &endCliente_ipv6, (socklen_t*) &tamEndereco_ipv6);
+        }
 
         while(1) {
-            nbytes = recv(csocket, msg, 2, 0);
+            nbytes = recv(csocket, msg, 100, 0);
             nbytes = send(csocket, msg, strlen(msg)+1, 0);
 
             if(!strcmp(msg, "1")) {
