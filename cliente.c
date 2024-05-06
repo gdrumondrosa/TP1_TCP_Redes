@@ -16,7 +16,7 @@ Coordinate coordCli = {-19.9735, -43.9671};
 
 int main(int argc, char const *argv[]) {
     int csocket, porta, nbytes, err;
-    char tipo[10], enderecoIP[10], msg[30];
+    char tipo[5], enderecoIP[15], msg[100];
     struct sockaddr_in endServidor;
 
     strcpy(tipo, argv[1]);
@@ -39,37 +39,34 @@ int main(int argc, char const *argv[]) {
         printf("0 - Sair\n1 - Solicitar corrida\n");
         scanf(" %s", msg);
         nbytes = send(csocket, msg, strlen(msg)+1, 0);
-        nbytes = recv(csocket, msg, 2, 0);
+        nbytes = recv(csocket, msg, 100, 0);
         if(!strcmp(msg, "1")) {
             sprintf(msg, "%f", coordCli.latitude);
             nbytes = send(csocket, msg, strlen(msg)+1, 0);
-            nbytes = recv(csocket, msg, 30, 0);
+            nbytes = recv(csocket, msg, 100, 0);
             
             sprintf(msg, "%f", coordCli.longitude);
             nbytes = send(csocket, msg, strlen(msg)+1, 0);
-            nbytes = recv(csocket, msg, 30, 0);
+            nbytes = recv(csocket, msg, 100, 0);
 
-            nbytes = recv(csocket, msg, 30, 0);
+            nbytes = recv(csocket, msg, 100, 0);
             nbytes = send(csocket, msg, strlen(msg)+1, 0);
             if(!strcmp(msg, "Não foi encontrado um motorista.\n")) {
                 printf("%s", msg);
-                printf("teste1\n");
             }
             else {
                 while(strcmp(msg, "O motorista chegou.\n")) {
                     printf("%s", msg);
-                    nbytes = recv(csocket, msg, 30, 0);
+                    nbytes = recv(csocket, msg, 100, 0);
                     nbytes = send(csocket, msg, strlen(msg)+1, 0);
                 }
                 printf("%s", msg);
                 break;
             }
-            printf("teste2\n");
         }
         else {
             break;
         }
-        printf("teste3\n");
     }
     
     /* Fechamento */

@@ -1,12 +1,22 @@
-all: cli-serTCP
+CC = gcc
+CFLAGS = -lm
+BIN_DIR = bin
+CLIENT_TARGET = $(BIN_DIR)/client
+SERVER_TARGET = $(BIN_DIR)/server
 
-cli-serTCP: cliente servidor
+.PHONY: all clean
 
-clienteTCP: cliente.c
-	gcc -o bin/cliente cliente.c -lm
+all: $(CLIENT_TARGET) $(SERVER_TARGET)
 
-servidorTCP: servidor.c
-	gcc -o bin/servidor servidor.c -lm
+$(CLIENT_TARGET): cliente.c | $(BIN_DIR)
+	$(CC) $(CFLAGS) cliente.c -o $(CLIENT_TARGET)
 
-clear:
-	rm cliente servidor
+$(SERVER_TARGET): servidor.c | $(BIN_DIR)
+	$(CC) $(CFLAGS) servidor.c -o $(SERVER_TARGET)
+
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
+
+clean:
+	rm -rf $(BIN_DIR)
+

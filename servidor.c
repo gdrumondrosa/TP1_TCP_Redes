@@ -41,7 +41,7 @@ int main(int argc, char const *argv[]) {
     char *eptr;
     int ssocket, csocket, porta, nbytes, err;
     double dist, latCli, longiCli;
-    char tipo[5], dist_char[10], at[30], msg[30];
+    char tipo[5], dist_char[10], at[100], msg[100];
     struct sockaddr_in endereco, endCliente;
     int tamEndereco = sizeof(endCliente);
 
@@ -67,45 +67,52 @@ int main(int argc, char const *argv[]) {
     while(1) {
         csocket = accept(ssocket, (struct sockaddr*) &endCliente, &tamEndereco);
 
-        nbytes = recv(csocket, msg, 2, 0);
-        nbytes = send(csocket, msg, strlen(msg)+1, 0);
-
-        if(!strcmp(msg, "1")) {
-            nbytes = recv(csocket, msg, 30, 0);
-            latCli = strtod(msg, &eptr);
+        while(1) {
+            nbytes = recv(csocket, msg, 2, 0);
             nbytes = send(csocket, msg, strlen(msg)+1, 0);
 
-            nbytes = recv(csocket, msg, 30, 0);
-            longiCli = strtod(msg, &eptr);
-            nbytes = send(csocket, msg, strlen(msg)+1, 0);
-
-            printf("Corrida disponível:\n0 - Recusar\n1 - Aceitar\n");
-            scanf(" %s", msg);
-
-            /* Comunicacao */
             if(!strcmp(msg, "1")) {
-                dist = haversine(latCli, longiCli, coordServ.latitude, coordServ.longitude);
-                while(dist > 0){
-                    sprintf(dist_char, "%0.f", dist);
-                    strcpy(at, "Motorista a ");
-                    strcat(at, dist_char);
-                    strcat(at, "m\n");
-                    nbytes = send(csocket, at, strlen(at)+1, 0);
-                    nbytes = recv(csocket, msg, 30, 0);
+                nbytes = recv(csocket, msg, 100, 0);
+                latCli = strtod(msg, &eptr);
+                nbytes = send(csocket, msg, strlen(msg)+1, 0);
 
-                    dist = dist - 400;
-                    sleep(2);
+                nbytes = recv(csocket, msg, 100, 0);
+                longiCli = strtod(msg, &eptr);
+                nbytes = send(csocket, msg, strlen(msg)+1, 0);
+
+                printf("Corrida disponível:\n0 - Recusar\n1 - Aceitar\n");
+                scanf(" %s", msg);
+
+                /* Comunicacao */
+                if(!strcmp(msg, "1")) {
+                    dist = haversine(latCli, longiCli, coordServ.latitude, coordServ.longitude);
+                    while(dist > 0){
+                        sprintf(dist_char, "%0.f", dist);
+                        strcpy(at, "Motorista a ");
+                        strcat(at, dist_char);
+                        strcat(at, "m\n");
+                        nbytes = send(csocket, at, strlen(at)+1, 0);
+                        nbytes = recv(csocket, msg, 100, 0);
+
+                        dist = dist - 400;
+                        sleep(2);
+                    }
+
+                    printf("O motorista chegou.\n");
+                    nbytes = send(csocket, "O motorista chegou.\n", strlen("O motorista chegou.\n")+1, 0);
+                    nbytes = recv(csocket, msg, 100, 0);
+                    printf("Aguardando solicitação.\n");
+                    break;
                 }
-
-                printf("O motorista chegou.\n");
-                nbytes = send(csocket, "O motorista chegou.\n", strlen("O motorista chegou.\n")+1, 0);
-                nbytes = recv(csocket, msg, 30, 0);
+                else {
+                    nbytes = send(csocket, "Não foi encontrado um motorista.\n", strlen("Não foi encontrado um motorista.\n")+1, 0);
+                    nbytes = recv(csocket, msg, 100, 0);
+                    printf("Aguardando solicitação.\n");
+                }
             }
             else {
-                nbytes = send(csocket, "Não foi encontrado um motorista.\n", strlen("Não foi encontrado um motorista.\n")+1, 0);
-                nbytes = recv(csocket, msg, 30, 0);
+                break;
             }
-            printf("Aguardando solicitação.\n");
         }
     }
 
