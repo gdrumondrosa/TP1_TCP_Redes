@@ -9,10 +9,10 @@ SERVER_TARGET = $(BIN_DIR)/server
 all: $(CLIENT_TARGET) $(SERVER_TARGET)
 
 $(CLIENT_TARGET): cliente.c | $(BIN_DIR)
-	$(CC) $(CFLAGS) cliente.c -o $(CLIENT_TARGET)
+	$(CC) cliente.c -o $(CLIENT_TARGET)
 
 $(SERVER_TARGET): servidor.c | $(BIN_DIR)
-	$(CC) $(CFLAGS) servidor.c -o $(SERVER_TARGET)
+	$(CC) servidor.c -o $(SERVER_TARGET) $(CFLAGS)
 
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
