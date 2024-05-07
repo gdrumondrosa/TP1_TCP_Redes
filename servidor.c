@@ -50,7 +50,8 @@ int main(int argc, char const *argv[]) {
     /* Leitura da porta a ser atribuida ao servidor */
     strcpy(tipo, argv[1]);
     porta = atoi(argv[2]);
-
+    
+    /* IPv4 */
     if(!strcmp(tipo, "ipv4")) {
         /* Criacao do socket */
         ssocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -60,9 +61,11 @@ int main(int argc, char const *argv[]) {
         endereco_ipv4.sin_family       = AF_INET;
         endereco_ipv4.sin_addr.s_addr  = INADDR_ANY;
         endereco_ipv4.sin_port         = htons(porta);
-
+        
+        /* Associação do IP a porta do Socket */
         err = bind(ssocket, (struct sockaddr*) &endereco_ipv4, sizeof(endereco_ipv4));
     }
+    /* IPv6 */
     else {
         /* Criacao do socket */
         ssocket = socket(AF_INET6, SOCK_STREAM, 0);
@@ -73,18 +76,24 @@ int main(int argc, char const *argv[]) {
         endereco_ipv6.sin6_addr         = in6addr_any;
         endereco_ipv6.sin6_port         = htons(porta);
 
+        /* Associação do IP a porta do Socket */
         err = bind(ssocket, (struct sockaddr*) &endereco_ipv6, sizeof(endereco_ipv6));
     }
 
+    /* Define o servidor como socket passivo */
     err = listen(ssocket, 1);
 
     printf("Aguardando solicitação.\n");
 
     while(1) {
+        /* IPv4 */
         if(!strcmp(tipo, "ipv4")) {
+            /* Socket do servidor aceita a conexão com o cliente */
             csocket = accept(ssocket, (struct sockaddr*) &endCliente_ipv4, &tamEndereco_ipv4);
         }
+        /* IPv6 */
         else {
+            /* Socket do servidor aceita a conexão com o cliente */
             csocket = accept(ssocket, (struct sockaddr*) &endCliente_ipv6, (socklen_t*) &tamEndereco_ipv6);
         }
 

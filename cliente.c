@@ -24,6 +24,7 @@ int main(int argc, char const *argv[]) {
     strcpy(enderecoIP, argv[2]);
     porta      = atoi(argv[3]);
 
+    /* IPv4 */
     if(!strcmp(tipo, "ipv4")) {
         /* Criacao do socket */
         csocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -34,8 +35,10 @@ int main(int argc, char const *argv[]) {
         endereco_ipv4.sin_addr.s_addr  = inet_addr(enderecoIP);
         endereco_ipv4.sin_port         = htons(porta);
 
+        /* Inicia a conexão com o servidor */
         err = connect(csocket, (struct sockaddr*) &endereco_ipv4, sizeof(endereco_ipv4));
     }
+    /* IPv6 */
     else {
         /* Criacao do socket */
         csocket = socket(AF_INET6, SOCK_STREAM, 0);
@@ -46,6 +49,7 @@ int main(int argc, char const *argv[]) {
         endereco_ipv6.sin6_addr         = in6addr_any;
         endereco_ipv6.sin6_port         = htons(porta);
 
+        /* Inicia a conexão com o servidor */
         err = connect(csocket, (struct sockaddr*) &endereco_ipv6, sizeof(endereco_ipv6));
     }
     
